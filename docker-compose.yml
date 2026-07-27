@@ -1,0 +1,73 @@
+# ============================================================================
+# Mana Community Auth Service — Docker Compose
+# ============================================================================
+# Start:   docker compose up -d
+# Logs:    docker compose logs -f auth
+# Stop:    docker compose down
+# ============================================================================
+
+services:
+  # ── Spring Boot Auth Service ──────────────────────────────────────
+  auth:
+    build: .
+    container_name: mana-auth
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/mana_auth_db
+      SPRING_DATASOURCE_USERNAME: mana
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-mana_dev_password}
+      SPRING_DATA_REDIS_HOST: redis
+      SERVER_PORT: 8083
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - mana-auth-net
+
+  # ── PostgreSQL ──────────────────────────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    container_name: mana-auth-db
+    environment:
+      POSTGRES_DB: mana_auth_db
+      POSTGRES_USER: mana
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-mana_dev_password}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5434:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mana -d mana_auth_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - mana-auth-net
+
+  # ── Redis (session & token cache) ───────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: mana-auth-redis
+    ports:
+      - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - mana-auth-net
+
+volumes:
+  pgdata:
+
+networks:
+  mana-auth-net:
+    driver: bridge

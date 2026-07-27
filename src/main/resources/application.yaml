@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: mana-community-auth
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when_authorized
+
+server:
+  port: ${SERVER_PORT:8083}
+
+app:
+  insert-sample-data: false
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
+  security:
+    mock-auth-enabled: false
+    jwt:
+      secret: ${JWT_SECRET:dev-only-insecure-secret-change-me-0123456789abcdef}
+      expiration-ms: ${JWT_EXPIRATION_MS:900000}
+      refresh-expiration-ms: ${JWT_REFRESH_EXPIRATION_MS:604800000}
+      issuer: ${JWT_ISSUER:mana-community}
+    rate-limit:
+      enabled: true
+      max-requests: 100
+      window-seconds: 60
