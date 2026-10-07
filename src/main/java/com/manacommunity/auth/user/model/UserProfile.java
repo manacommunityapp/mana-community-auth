@@ -1,5 +1,6 @@
 package com.manacommunity.auth.user.model;
 
+import com.manacommunity.common.user.model.AppUser;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;

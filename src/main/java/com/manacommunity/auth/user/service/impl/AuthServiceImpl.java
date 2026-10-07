@@ -169,6 +169,19 @@ public class AuthServiceImpl implements AuthService {
             user.setLockedUntil(null);
             userRepository.save(user);
         }
+
+        // 3b. Check if user has MFA enabled
+        if (Boolean.TRUE.equals(user.getMfaEnabled()) && user.getMfaSecret() != null) {
+            AuthResponse mfaChallenge = new AuthResponse();
+            mfaChallenge.setUserId(String.valueOf(user.getId()));
+            mfaChallenge.setEmail(user.getEmail());
+            mfaChallenge.setFullName(user.getFullName());
+            mfaChallenge.setRole(user.getRole());
+            mfaChallenge.setMfaRequired(true);
+            mfaChallenge.setMessage("MFA verification required. Please enter 6-digit TOTP code.");
+            return mfaChallenge;
+        }
+
         auditLog.record(AuditLogService.Action.LOGIN_SUCCESS, user.getId(), user.getEmail());
         sessionService.startSession(user.getId(), user.getEmail());
         return buildAuthResponse(user, "Login successful!");

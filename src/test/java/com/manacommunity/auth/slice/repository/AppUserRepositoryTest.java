@@ -9,7 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
 import java.util.Optional;
 
@@ -108,7 +108,7 @@ class AppUserRepositoryTest extends BaseRepositoryTest {
     @Test
     @DisplayName("save persists all required fields")
     void saveAllFields() {
-        var community = em.find(com.manacommunity.auth.model.Community.class,
+        var community = em.find(com.manacommunity.common.model.Community.class,
                 savedUser.getCommunity().getId());
 
         AppUser newUser = TestDataBuilder.memberUser();

@@ -38,6 +38,12 @@ class AuthServiceTest {
     @Mock CommunityRepository communityRepository;
     @Mock RoleRepository roleRepository;
     @Mock PasswordEncoder passwordEncoder;
+    @Mock com.manacommunity.common.security.JwtTokenProvider jwtTokenProvider;
+    @Mock com.manacommunity.common.security.AuditLogService auditLog;
+    @Mock com.manacommunity.common.security.AuditService auditService;
+    @Mock com.manacommunity.auth.user.security.SessionService sessionService;
+    @Mock com.manacommunity.auth.service.FieldEncryptionService fieldEncryptionService;
+    @Mock com.manacommunity.auth.service.CommunityModuleService communityModuleService;
 
     @InjectMocks AuthServiceImpl authService;
 
@@ -59,6 +65,8 @@ class AuthServiceTest {
             when(userRepository.existsByPhone(req.getPhone())).thenReturn(false);
             when(passwordEncoder.encode(req.getPassword())).thenReturn("hashed");
             when(roleRepository.findByNameIgnoreCaseAndCommunityId("MEMBER", 1L)).thenReturn(Optional.of(role));
+            when(jwtTokenProvider.generateToken(any(AppUser.class))).thenReturn("mock-token-xyz");
+            when(jwtTokenProvider.generateRefreshToken(any(AppUser.class))).thenReturn("mock-refresh-xyz");
             when(userRepository.save(any(AppUser.class))).thenAnswer(inv -> {
                 AppUser u = inv.getArgument(0);
                 u.setId(99L);
@@ -174,12 +182,13 @@ class AuthServiceTest {
         }
 
         @Test
-        @DisplayName("unknown email throws ResourceNotFoundException")
+        @DisplayName("unknown email throws generic invalid credentials ManaCommunityException")
         void unknownEmail() {
             when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> authService.loginUser(TestDataBuilder.loginRequest("x@x.com", "p")))
-                    .isInstanceOf(ResourceNotFoundException.class);
+                    .isInstanceOf(ManaCommunityException.class)
+                    .hasMessageContaining("Invalid email or password");
         }
     }
 }

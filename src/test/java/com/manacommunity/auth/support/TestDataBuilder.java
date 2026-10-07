@@ -85,7 +85,7 @@ public final class TestDataBuilder {
         req.setFullName("John Doe");
         req.setEmail("john@example.com");
         req.setPhone("9876543210");
-        req.setPassword("password123");
+        req.setPassword("St40ng!X9#qLz");
         req.setAadharNumber("123456789012");
         req.setInviteCode("INVITE123");
         req.setDateOfBirth(LocalDate.of(1995, 6, 15));

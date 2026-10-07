@@ -14,6 +14,11 @@ public class AuthResponse {
     private java.time.LocalDate dateOfBirth;
     private java.util.List<String> enabledModules;
 
+    private boolean mfaRequired;
+    private String preAuthToken;
+
+    public AuthResponse() {}
+
     public AuthResponse(String userId, String message, String token) {
         this.userId = userId;
         this.message = message;
@@ -75,4 +80,10 @@ public class AuthResponse {
 
     public java.util.List<String> getEnabledModules() { return enabledModules; }
     public void setEnabledModules(java.util.List<String> enabledModules) { this.enabledModules = enabledModules; }
+
+    public boolean isMfaRequired() { return mfaRequired; }
+    public void setMfaRequired(boolean mfaRequired) { this.mfaRequired = mfaRequired; }
+
+    public String getPreAuthToken() { return preAuthToken; }
+    public void setPreAuthToken(String preAuthToken) { this.preAuthToken = preAuthToken; }
 }

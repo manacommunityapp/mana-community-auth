@@ -33,20 +33,20 @@ public class UserController {
         if (user.getRole() == null) {
             return java.util.Collections.emptyList();
         }
-        java.util.List<com.manacommunity.auth.model.RolePermission> userPerms = rolePermissionRepo.findByUserId(user.getId());
+        java.util.List<com.manacommunity.common.model.RolePermission> userPerms = rolePermissionRepo.findByUserId(user.getId());
         if (!userPerms.isEmpty()) {
             return userPerms.stream()
-                    .map(com.manacommunity.auth.model.RolePermission::getPermissionKey)
+                    .map(com.manacommunity.common.model.RolePermission::getPermissionKey)
                     .toList();
         }
         if (user.getRoleEntity() != null) {
             return user.getRoleEntity().getPermissions().stream()
-                    .map(com.manacommunity.auth.model.RolePermission::getPermissionKey)
+                    .map(com.manacommunity.common.model.RolePermission::getPermissionKey)
                     .toList();
         }
         return rolePermissionRepo.findByRoleIgnoreCase(user.getRole()).stream()
                 .filter(rp -> rp.getUser() == null)
-                .map(com.manacommunity.auth.model.RolePermission::getPermissionKey)
+                .map(com.manacommunity.common.model.RolePermission::getPermissionKey)
                 .toList();
     }
 
@@ -275,7 +275,7 @@ public class UserController {
         
         // Resolve and update roleEntity scoped to user's community
         Long communityId = user.getCommunity() != null ? user.getCommunity().getId() : null;
-        com.manacommunity.auth.model.Role roleEntity = roleService.findOrCreateRole(normRole, communityId);
+        com.manacommunity.common.model.Role roleEntity = roleService.findOrCreateRole(normRole, communityId);
         if (roleEntity == null) {
             throw new com.manacommunity.common.exception.InvalidInputException("Failed to resolve role: " + normRole);
         }
@@ -287,16 +287,16 @@ public class UserController {
         rolePermissionRepo.flush();
 
         // Load standard role permission templates (where user is null) from the resolved roleEntity
-        java.util.Set<com.manacommunity.auth.model.RolePermission> templates =
+        java.util.Set<com.manacommunity.common.model.RolePermission> templates =
                 roleEntity.getPermissions() != null ? roleEntity.getPermissions() : java.util.Collections.emptySet();
         
         // Create and save user-specific role permissions
-        java.util.List<com.manacommunity.auth.model.RolePermission> userPermissions = templates.stream()
+        java.util.List<com.manacommunity.common.model.RolePermission> userPermissions = templates.stream()
                 .filter(t -> t.getUser() == null) // copy from generic template
                 .map(t -> t.getPermissionKey())
                 .filter(pk -> pk != null && !pk.trim().isEmpty())
                 .distinct()
-                .map(pk -> com.manacommunity.auth.model.RolePermission.builder()
+                .map(pk -> com.manacommunity.common.model.RolePermission.builder()
                         .role(normRole)
                         .roleEntity(roleEntity)
                         .permissionKey(pk)
